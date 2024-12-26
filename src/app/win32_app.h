@@ -57,4 +57,4 @@ enum OC_WM_USER
     OC_WM_USER_WAKEUP = 0x0401,
 };
 
-#endif __WIN32_APP_H_
+#endif // __WIN32_APP_H_
