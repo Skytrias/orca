@@ -418,9 +418,8 @@ void log_entry_ui(oc_debug_overlay* overlay, log_entry* entry)
 
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                      .size.height = { OC_UI_SIZE_CHILDREN },
-                                     .layout.axis = OC_UI_AXIS_Y,
-                                     .layout.margin.x = 10,
-                                     .layout.margin.y = 5,
+                                     .margin.x = 10,
+                                     .margin.y = 5,
                                      .bgColor = bgColors[entry->level][entry->recordIndex & 1] },
                      OC_UI_STYLE_SIZE
                          | OC_UI_STYLE_LAYOUT_AXIS
@@ -429,15 +428,17 @@ void log_entry_ui(oc_debug_overlay* overlay, log_entry* entry)
 
     oc_str8 key = oc_str8_pushf(scratch.arena, "%ull", entry->recordIndex);
 
-    oc_ui_container_str8(key, OC_UI_FLAG_DRAW_BACKGROUND)
+    oc_ui_box* box = oc_ui_box_begin_str8(key, OC_UI_FLAG_DRAW_BACKGROUND);
+    box->layoutAxis = OC_UI_AXIS_Y;
     {
         oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                          .size.height = { OC_UI_SIZE_CHILDREN },
-                                         .layout.axis = OC_UI_AXIS_X },
+                                         },
                          OC_UI_STYLE_SIZE
                              | OC_UI_STYLE_LAYOUT_AXIS);
 
-        oc_ui_container("header", 0)
+        oc_ui_box* header = oc_ui_box_begin("header", 0);
+        header->layoutAxis = OC_UI_AXIS_X;
         {
             oc_ui_style_next(&(oc_ui_style){ .color = levelColors[entry->level],
                                              .font = overlay->fontBold },
@@ -452,8 +453,10 @@ void log_entry_ui(oc_debug_overlay* overlay, log_entry* entry)
                                         entry->line);
             oc_ui_label_str8(loc);
         }
+        oc_ui_box_end();
         oc_ui_label_str8(entry->msg);
     }
+    oc_ui_box_end();
     oc_scratch_end(scratch);
 }
 
@@ -892,27 +895,27 @@ i32 orca_runloop(void* user)
 
                 oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                                  .size.height = { OC_UI_SIZE_PARENT, 0.4 },
-                                                 .layout.axis = OC_UI_AXIS_Y,
                                                  .bgColor = { 0, 0, 0, 0.5 } },
                                  OC_UI_STYLE_SIZE
                                      | OC_UI_STYLE_LAYOUT_AXIS
                                      | OC_UI_STYLE_BG_COLOR);
 
-                oc_ui_container("log console", OC_UI_FLAG_DRAW_BACKGROUND)
+                oc_ui_box* logConsole = oc_ui_box_begin("log console", OC_UI_FLAG_DRAW_BACKGROUND);
+                logConsole->layoutAxis = OC_UI_AXIS_Y;
                 {
                     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                                      .size.height = { OC_UI_SIZE_CHILDREN },
-                                                     .layout.axis = OC_UI_AXIS_X,
-                                                     .layout.spacing = 10,
-                                                     .layout.margin.x = 10,
-                                                     .layout.margin.y = 10 },
+                                                     .spacing = 10,
+                                                     .margin.x = 10,
+                                                     .margin.y = 10 },
                                      OC_UI_STYLE_SIZE
                                          | OC_UI_STYLE_LAYOUT);
 
-                    oc_ui_container("log toolbar", 0)
+                    oc_ui_box* logToolbar = oc_ui_box_begin("log toolbar", 0);
+                    logToolbar->layoutAxis = OC_UI_AXIS_X;
                     {
-                        oc_ui_style buttonStyle = { .layout.margin.x = 4,
-                                                    .layout.margin.y = 4,
+                        oc_ui_style buttonStyle = { .margin.x = 4,
+                                                    .margin.y = 4,
                                                     .roundness = 2,
                                                     .bgColor = { 0, 0, 0, 0.5 },
                                                     .color = { 1, 1, 1, 1 } };
@@ -959,18 +962,19 @@ i32 orca_runloop(void* user)
 
                         oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                                          .size.height = { OC_UI_SIZE_CHILDREN },
-                                                         .layout.axis = OC_UI_AXIS_Y,
-                                                         .layout.margin.y = 5 },
+                                                         .margin.y = 5 },
                                          OC_UI_STYLE_SIZE
                                              | OC_UI_STYLE_LAYOUT_AXIS);
 
-                        oc_ui_container("contents", 0)
+                        oc_ui_box* contents = oc_ui_box_begin("contents", 0);
+                        contents->layoutAxis = OC_UI_AXIS_Y;
                         {
                             oc_list_for(app->debugOverlay.logEntries, entry, log_entry, listElt)
                             {
                                 log_entry_ui(&app->debugOverlay, entry);
                             }
                         }
+                        oc_ui_box_end();
                     }
                     if(app->debugOverlay.logScrollToLast)
                     {
@@ -987,7 +991,9 @@ i32 orca_runloop(void* user)
                     {
                         app->debugOverlay.logScrollToLast = true;
                     }
+                    oc_ui_box_end();
                 }
+                oc_ui_box_end();
             }
 
             oc_ui_draw();

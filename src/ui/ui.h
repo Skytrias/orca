@@ -24,7 +24,7 @@ typedef struct oc_ui_key
 typedef enum
 {
     OC_UI_AXIS_X,
-    OC_UI_AXIS_Y,
+    OC_UI_AXIS_Y, // TODO should this be the default? so Y = 0
     OC_UI_AXIS_COUNT
 } oc_ui_axis;
 
@@ -46,25 +46,36 @@ typedef union oc_ui_layout_align
     oc_ui_align c[OC_UI_AXIS_COUNT];
 } oc_ui_layout_align;
 
-typedef struct oc_ui_layout
+typedef union oc_ui_margin 
 {
-    oc_ui_axis axis;
-    f32 spacing;
-
-    union
+    struct
     {
-        struct
-        {
-            f32 x;
-            f32 y;
-        };
+        f32 x;
+        f32 y;
+    };
 
-        f32 c[OC_UI_AXIS_COUNT];
-    } margin;
+    f32 c[OC_UI_AXIS_COUNT];
+} oc_ui_margin;
 
-    oc_ui_layout_align align;
+// typedef struct oc_ui_layout
+// {
+//     oc_ui_axis axis;
+//     f32 spacing;
 
-} oc_ui_layout;
+//     union
+//     {
+//         struct
+//         {
+//             f32 x;
+//             f32 y;
+//         };
+
+//         f32 c[OC_UI_AXIS_COUNT];
+//     } margin;
+
+//     oc_ui_layout_align align;
+
+// } oc_ui_layout;
 
 typedef enum oc_ui_size_kind
 {
@@ -160,7 +171,7 @@ enum
 typedef struct oc_ui_style
 {
     oc_ui_box_size size;
-    oc_ui_layout layout;
+    // oc_ui_layout layout;
     oc_ui_box_floating floating;
     oc_vec2 floatTarget;
     oc_color color;
@@ -170,6 +181,11 @@ typedef struct oc_ui_style
     f32 fontSize;
     f32 borderSize;
     f32 roundness;
+
+    f32 spacing;
+    oc_ui_margin margin;
+    oc_ui_layout_align textAlign;
+
     f32 animationTime;
     oc_ui_style_mask animationMask;
 } oc_ui_style;
@@ -517,6 +533,9 @@ struct oc_ui_box
     oc_list beforeRules;
     oc_list afterRules;
 
+    // Which direction the layout will go
+    oc_ui_axis layoutAxis;
+    oc_ui_layout_align layoutAlign;
     oc_ui_style* targetStyle;
     oc_ui_style style;
     u32 z;
