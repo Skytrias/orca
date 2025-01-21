@@ -658,105 +658,104 @@ void oc_ui_box_animate_style(oc_ui_context* ui, oc_ui_box* box)
     //NOTE: interpolate based on transition values
     oc_ui_style_mask mask = box->targetStyle->animationMask;
 
-    // TODO adjust animations
-    // if(box->fresh)
-    // {
-    //     box->style = *targetStyle;
-    // }
-    // else
-    // {
-    //     if(mask & OC_UI_STYLE_SIZE_WIDTH)
-    //     {
-    //         oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_X], targetStyle->size.c[OC_UI_AXIS_X], animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.size.c[OC_UI_AXIS_X] = targetStyle->size.c[OC_UI_AXIS_X];
-    //     }
+    // TODO adjust to no masking!
+    if(box->fresh)
+    {
+        box->style = *targetStyle;
+    }
+    else
+    {
+        if(mask & OC_UI_STYLE_SIZE_WIDTH)
+        {
+            oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_X], targetStyle->size.c[OC_UI_AXIS_X], animationTime);
+        }
+        else
+        {
+            box->style.size.c[OC_UI_AXIS_X] = targetStyle->size.c[OC_UI_AXIS_X];
+        }
 
-    //     if(mask & OC_UI_STYLE_SIZE_HEIGHT)
-    //     {
-    //         oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_Y], targetStyle->size.c[OC_UI_AXIS_Y], animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.size.c[OC_UI_AXIS_Y] = targetStyle->size.c[OC_UI_AXIS_Y];
-    //     }
+        if(mask & OC_UI_STYLE_SIZE_HEIGHT)
+        {
+            oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_Y], targetStyle->size.c[OC_UI_AXIS_Y], animationTime);
+        }
+        else
+        {
+            box->style.size.c[OC_UI_AXIS_Y] = targetStyle->size.c[OC_UI_AXIS_Y];
+        }
 
-    //     if(mask & OC_UI_STYLE_COLOR)
-    //     {
-    //         oc_ui_animate_color(ui, &box->style.color, targetStyle->color, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.color = targetStyle->color;
-    //     }
+        if(mask & OC_UI_STYLE_COLOR)
+        {
+            oc_ui_animate_color(ui, &box->style.color, targetStyle->color, animationTime);
+        }
+        else
+        {
+            box->style.color = targetStyle->color;
+        }
 
-    //     if(mask & OC_UI_STYLE_BG_COLOR)
-    //     {
-    //         oc_ui_animate_color(ui, &box->style.bgColor, targetStyle->bgColor, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.bgColor = targetStyle->bgColor;
-    //     }
+        if(mask & OC_UI_STYLE_BG_COLOR)
+        {
+            oc_ui_animate_color(ui, &box->style.bgColor, targetStyle->bgColor, animationTime);
+        }
+        else
+        {
+            box->style.bgColor = targetStyle->bgColor;
+        }
 
-    //     if(mask & OC_UI_STYLE_BORDER_COLOR)
-    //     {
-    //         oc_ui_animate_color(ui, &box->style.borderColor, targetStyle->borderColor, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.borderColor = targetStyle->borderColor;
-    //     }
+        if(mask & OC_UI_STYLE_BORDER_COLOR)
+        {
+            oc_ui_animate_color(ui, &box->style.borderColor, targetStyle->borderColor, animationTime);
+        }
+        else
+        {
+            box->style.borderColor = targetStyle->borderColor;
+        }
 
-    //     if(mask & OC_UI_STYLE_FONT_SIZE)
-    //     {
-    //         oc_ui_animate_f32(ui, &box->style.fontSize, targetStyle->fontSize, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.fontSize = targetStyle->fontSize;
-    //     }
+        if(mask & OC_UI_STYLE_FONT_SIZE)
+        {
+            oc_ui_animate_f32(ui, &box->style.fontSize, targetStyle->fontSize, animationTime);
+        }
+        else
+        {
+            box->style.fontSize = targetStyle->fontSize;
+        }
 
-    //     if(mask & OC_UI_STYLE_BORDER_SIZE)
-    //     {
-    //         oc_ui_animate_f32(ui, &box->style.borderSize, targetStyle->borderSize, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.borderSize = targetStyle->borderSize;
-    //     }
+        if(mask & OC_UI_STYLE_BORDER_SIZE)
+        {
+            oc_ui_animate_f32(ui, &box->style.borderSize, targetStyle->borderSize, animationTime);
+        }
+        else
+        {
+            box->style.borderSize = targetStyle->borderSize;
+        }
 
-    //     if(mask & OC_UI_STYLE_ROUNDNESS)
-    //     {
-    //         oc_ui_animate_f32(ui, &box->style.roundness, targetStyle->roundness, animationTime);
-    //     }
-    //     else
-    //     {
-    //         box->style.roundness = targetStyle->roundness;
-    //     }
+        if(mask & OC_UI_STYLE_ROUNDNESS)
+        {
+            oc_ui_animate_f32(ui, &box->style.roundness, targetStyle->roundness, animationTime);
+        }
+        else
+        {
+            box->style.roundness = targetStyle->roundness;
+        }
 
-    //     //NOTE: float target is animated in compute rect
-    //     box->style.floatTarget = targetStyle->floatTarget;
+        //NOTE: float target is animated in compute rect
+        box->style.floatTarget = targetStyle->floatTarget;
 
-    //     //TODO: non animatable attributes. use mask
-    //     box->style.layout = targetStyle->layout;
-    //     box->style.font = targetStyle->font;
-    // }
+        //TODO: non animatable attributes. use mask
+        box->style.font = targetStyle->font;
+    }
 }
 
 void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src, oc_ui_style_mask mask)
 {
     // TODO adjust masking
-    // if(mask & OC_UI_STYLE_SIZE_WIDTH)
-    // {
-    //     dst->size.c[OC_UI_AXIS_X] = src->size.c[OC_UI_AXIS_X];
-    // }
-    // if(mask & OC_UI_STYLE_SIZE_HEIGHT)
-    // {
-    //     dst->size.c[OC_UI_AXIS_Y] = src->size.c[OC_UI_AXIS_Y];
-    // }
+    if(mask & OC_UI_STYLE_SIZE_WIDTH)
+    {
+        dst->size.c[OC_UI_AXIS_X] = src->size.c[OC_UI_AXIS_X];
+    }
+    if(mask & OC_UI_STYLE_SIZE_HEIGHT)
+    {
+        dst->size.c[OC_UI_AXIS_Y] = src->size.c[OC_UI_AXIS_Y];
+    }
     // if(mask & OC_UI_STYLE_LAYOUT_AXIS)
     // {
     //     layoutAxis = layoutAxis;
@@ -769,64 +768,64 @@ void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src, oc_ui_style
     // {
     //     dst->layout.align.y = src->layout.align.y;
     // }
-    // if(mask & OC_UI_STYLE_LAYOUT_SPACING)
-    // {
-    //     dst->spacing = src->spacing;
-    // }
-    // if(mask & OC_UI_STYLE_LAYOUT_MARGIN_X)
-    // {
-    //     dst->margin.x = src->margin.x;
-    // }
-    // if(mask & OC_UI_STYLE_LAYOUT_MARGIN_Y)
-    // {
-    //     dst->margin.y = src->margin.y;
-    // }
-    // if(mask & OC_UI_STYLE_FLOAT_X)
-    // {
-    //     dst->floating.c[OC_UI_AXIS_X] = src->floating.c[OC_UI_AXIS_X];
-    //     dst->floatTarget.x = src->floatTarget.x;
-    // }
-    // if(mask & OC_UI_STYLE_FLOAT_Y)
-    // {
-    //     dst->floating.c[OC_UI_AXIS_Y] = src->floating.c[OC_UI_AXIS_Y];
-    //     dst->floatTarget.y = src->floatTarget.y;
-    // }
-    // if(mask & OC_UI_STYLE_COLOR)
-    // {
-    //     dst->color = src->color;
-    // }
-    // if(mask & OC_UI_STYLE_BG_COLOR)
-    // {
-    //     dst->bgColor = src->bgColor;
-    // }
-    // if(mask & OC_UI_STYLE_BORDER_COLOR)
-    // {
-    //     dst->borderColor = src->borderColor;
-    // }
-    // if(mask & OC_UI_STYLE_BORDER_SIZE)
-    // {
-    //     dst->borderSize = src->borderSize;
-    // }
-    // if(mask & OC_UI_STYLE_ROUNDNESS)
-    // {
-    //     dst->roundness = src->roundness;
-    // }
-    // if(mask & OC_UI_STYLE_FONT)
-    // {
-    //     dst->font = src->font;
-    // }
-    // if(mask & OC_UI_STYLE_FONT_SIZE)
-    // {
-    //     dst->fontSize = src->fontSize;
-    // }
-    // if(mask & OC_UI_STYLE_ANIMATION_TIME)
-    // {
-    //     dst->animationTime = src->animationTime;
-    // }
-    // if(mask & OC_UI_STYLE_ANIMATION_MASK)
-    // {
-    //     dst->animationMask = src->animationMask;
-    // }
+    if(mask & OC_UI_STYLE_LAYOUT_SPACING)
+    {
+        dst->spacing = src->spacing;
+    }
+    if(mask & OC_UI_STYLE_LAYOUT_MARGIN_X)
+    {
+        dst->margin.x = src->margin.x;
+    }
+    if(mask & OC_UI_STYLE_LAYOUT_MARGIN_Y)
+    {
+        dst->margin.y = src->margin.y;
+    }
+    if(mask & OC_UI_STYLE_FLOAT_X)
+    {
+        dst->floating.c[OC_UI_AXIS_X] = src->floating.c[OC_UI_AXIS_X];
+        dst->floatTarget.x = src->floatTarget.x;
+    }
+    if(mask & OC_UI_STYLE_FLOAT_Y)
+    {
+        dst->floating.c[OC_UI_AXIS_Y] = src->floating.c[OC_UI_AXIS_Y];
+        dst->floatTarget.y = src->floatTarget.y;
+    }
+    if(mask & OC_UI_STYLE_COLOR)
+    {
+        dst->color = src->color;
+    }
+    if(mask & OC_UI_STYLE_BG_COLOR)
+    {
+        dst->bgColor = src->bgColor;
+    }
+    if(mask & OC_UI_STYLE_BORDER_COLOR)
+    {
+        dst->borderColor = src->borderColor;
+    }
+    if(mask & OC_UI_STYLE_BORDER_SIZE)
+    {
+        dst->borderSize = src->borderSize;
+    }
+    if(mask & OC_UI_STYLE_ROUNDNESS)
+    {
+        dst->roundness = src->roundness;
+    }
+    if(mask & OC_UI_STYLE_FONT)
+    {
+        dst->font = src->font;
+    }
+    if(mask & OC_UI_STYLE_FONT_SIZE)
+    {
+        dst->fontSize = src->fontSize;
+    }
+    if(mask & OC_UI_STYLE_ANIMATION_TIME)
+    {
+        dst->animationTime = src->animationTime;
+    }
+    if(mask & OC_UI_STYLE_ANIMATION_MASK)
+    {
+        dst->animationMask = src->animationMask;
+    }
 }
 
 bool oc_ui_style_selector_match(oc_ui_box* box, oc_ui_style_rule* rule, oc_ui_selector* selector)
