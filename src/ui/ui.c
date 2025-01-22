@@ -254,14 +254,13 @@ oc_ui_pattern oc_ui_pattern_owner(void)
     return (pattern);
 }
 
-void oc_ui_style_match_before(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask)
+void oc_ui_style_match_before(oc_ui_pattern pattern, oc_ui_style* style)
 {
     oc_ui_context* ui = oc_ui_get_context();
     if(ui)
     {
         oc_ui_style_rule* rule = oc_arena_push_type(&ui->frameArena, oc_ui_style_rule);
         rule->pattern = pattern;
-        rule->mask = mask;
         rule->style = oc_arena_push_type(&ui->frameArena, oc_ui_style);
         *rule->style = *style;
 
@@ -269,14 +268,13 @@ void oc_ui_style_match_before(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_s
     }
 }
 
-void oc_ui_style_match_after(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask)
+void oc_ui_style_match_after(oc_ui_pattern pattern, oc_ui_style* style)
 {
     oc_ui_context* ui = oc_ui_get_context();
     if(ui)
     {
         oc_ui_style_rule* rule = oc_arena_push_type(&ui->frameArena, oc_ui_style_rule);
         rule->pattern = pattern;
-        rule->mask = mask;
         rule->style = oc_arena_push_type(&ui->frameArena, oc_ui_style);
         *rule->style = *style;
 
@@ -284,19 +282,18 @@ void oc_ui_style_match_after(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_st
     }
 }
 
-void oc_ui_style_next(oc_ui_style* style, oc_ui_style_mask mask)
+void oc_ui_style_next(oc_ui_style* style)
 {
-    oc_ui_style_match_before(oc_ui_pattern_owner(), style, mask);
+    oc_ui_style_match_before(oc_ui_pattern_owner(), style);
 }
 
-void oc_ui_style_box_before(oc_ui_box* box, oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask)
+void oc_ui_style_box_before(oc_ui_box* box, oc_ui_pattern pattern, oc_ui_style* style)
 {
     oc_ui_context* ui = oc_ui_get_context();
     if(ui)
     {
         oc_ui_style_rule* rule = oc_arena_push_type(&ui->frameArena, oc_ui_style_rule);
         rule->pattern = pattern;
-        rule->mask = mask;
         rule->style = oc_arena_push_type(&ui->frameArena, oc_ui_style);
         *rule->style = *style;
 
@@ -305,14 +302,13 @@ void oc_ui_style_box_before(oc_ui_box* box, oc_ui_pattern pattern, oc_ui_style* 
     }
 }
 
-void oc_ui_style_box_after(oc_ui_box* box, oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask)
+void oc_ui_style_box_after(oc_ui_box* box, oc_ui_pattern pattern, oc_ui_style* style)
 {
     oc_ui_context* ui = oc_ui_get_context();
     if(ui)
     {
         oc_ui_style_rule* rule = oc_arena_push_type(&ui->frameArena, oc_ui_style_rule);
         rule->pattern = pattern;
-        rule->mask = mask;
         rule->style = oc_arena_push_type(&ui->frameArena, oc_ui_style);
         *rule->style = *style;
 
@@ -437,7 +433,7 @@ oc_ui_box* oc_ui_box_make_str8(oc_str8 string, oc_ui_flags flags)
         .color = ui->theme->text0,
         .fontSize = 14,
     };
-    oc_ui_apply_style_with_mask(box->targetStyle, &defaultStyle, ~0ULL);
+    oc_ui_apply_style_with_mask(box->targetStyle, &defaultStyle);
 
     box->layoutAlign = (oc_ui_layout_align) { OC_UI_ALIGN_START, OC_UI_ALIGN_START };
     box->layoutAxis = OC_UI_AXIS_Y;
@@ -655,9 +651,7 @@ void oc_ui_box_animate_style(oc_ui_context* ui, oc_ui_box* box)
 
     f32 animationTime = targetStyle->animationTime;
 
-    //NOTE: interpolate based on transition values
-    oc_ui_style_mask mask = box->targetStyle->animationMask;
-
+    // TODO (Skytrias): Just make this always be the case? always animate?
     // TODO adjust to no masking!
     if(box->fresh)
     {
@@ -665,166 +659,92 @@ void oc_ui_box_animate_style(oc_ui_context* ui, oc_ui_box* box)
     }
     else
     {
-        if(mask & OC_UI_STYLE_SIZE_WIDTH)
-        {
-            oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_X], targetStyle->size.c[OC_UI_AXIS_X], animationTime);
-        }
-        else
-        {
-            box->style.size.c[OC_UI_AXIS_X] = targetStyle->size.c[OC_UI_AXIS_X];
-        }
+        // oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_X], targetStyle->size.c[OC_UI_AXIS_X], animationTime);
+        box->style.size.c[OC_UI_AXIS_X] = targetStyle->size.c[OC_UI_AXIS_X];
 
-        if(mask & OC_UI_STYLE_SIZE_HEIGHT)
-        {
-            oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_Y], targetStyle->size.c[OC_UI_AXIS_Y], animationTime);
-        }
-        else
-        {
-            box->style.size.c[OC_UI_AXIS_Y] = targetStyle->size.c[OC_UI_AXIS_Y];
-        }
+        // oc_ui_animate_oc_ui_size(ui, &box->style.size.c[OC_UI_AXIS_Y], targetStyle->size.c[OC_UI_AXIS_Y], animationTime);
+        box->style.size.c[OC_UI_AXIS_Y] = targetStyle->size.c[OC_UI_AXIS_Y];
 
-        if(mask & OC_UI_STYLE_COLOR)
-        {
-            oc_ui_animate_color(ui, &box->style.color, targetStyle->color, animationTime);
-        }
-        else
-        {
-            box->style.color = targetStyle->color;
-        }
+        // oc_ui_animate_color(ui, &box->style.color, targetStyle->color, animationTime);
+        box->style.color = targetStyle->color;
 
-        if(mask & OC_UI_STYLE_BG_COLOR)
-        {
-            oc_ui_animate_color(ui, &box->style.bgColor, targetStyle->bgColor, animationTime);
-        }
-        else
-        {
-            box->style.bgColor = targetStyle->bgColor;
-        }
+        // oc_ui_animate_color(ui, &box->style.bgColor, targetStyle->bgColor, animationTime);
+        box->style.bgColor = targetStyle->bgColor;
 
-        if(mask & OC_UI_STYLE_BORDER_COLOR)
-        {
-            oc_ui_animate_color(ui, &box->style.borderColor, targetStyle->borderColor, animationTime);
-        }
-        else
-        {
-            box->style.borderColor = targetStyle->borderColor;
-        }
+        // oc_ui_animate_color(ui, &box->style.borderColor, targetStyle->borderColor, animationTime);
+        box->style.borderColor = targetStyle->borderColor;
 
-        if(mask & OC_UI_STYLE_FONT_SIZE)
-        {
-            oc_ui_animate_f32(ui, &box->style.fontSize, targetStyle->fontSize, animationTime);
-        }
-        else
-        {
-            box->style.fontSize = targetStyle->fontSize;
-        }
+        // oc_ui_animate_f32(ui, &box->style.fontSize, targetStyle->fontSize, animationTime);
+        box->style.fontSize = targetStyle->fontSize;
 
-        if(mask & OC_UI_STYLE_BORDER_SIZE)
-        {
-            oc_ui_animate_f32(ui, &box->style.borderSize, targetStyle->borderSize, animationTime);
-        }
-        else
-        {
-            box->style.borderSize = targetStyle->borderSize;
-        }
+        // oc_ui_animate_f32(ui, &box->style.borderSize, targetStyle->borderSize, animationTime);
+        box->style.borderSize = targetStyle->borderSize;
 
-        if(mask & OC_UI_STYLE_ROUNDNESS)
-        {
-            oc_ui_animate_f32(ui, &box->style.roundness, targetStyle->roundness, animationTime);
-        }
-        else
-        {
-            box->style.roundness = targetStyle->roundness;
-        }
+        // oc_ui_animate_f32(ui, &box->style.roundness, targetStyle->roundness, animationTime);
+        box->style.roundness = targetStyle->roundness;
 
         //NOTE: float target is animated in compute rect
         box->style.floatTarget = targetStyle->floatTarget;
 
         //TODO: non animatable attributes. use mask
         box->style.font = targetStyle->font;
+
+        box->style.spacing = targetStyle->spacing;
+        box->style.margin = targetStyle->margin;
+        box->style.textAlign = targetStyle->textAlign;
     }
 }
 
-void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src, oc_ui_style_mask mask)
+void oc_ui_apply_style_size(oc_ui_size* dst, oc_ui_size* src) 
 {
-    // TODO adjust masking
-    if(mask & OC_UI_STYLE_SIZE_WIDTH)
-    {
-        dst->size.c[OC_UI_AXIS_X] = src->size.c[OC_UI_AXIS_X];
+    if (src->kind) {
+        dst->kind = src->kind;
+        dst->value = src->value;
+        dst->minSize = src->minSize;
+        dst->relax = src->relax;
     }
-    if(mask & OC_UI_STYLE_SIZE_HEIGHT)
-    {
-        dst->size.c[OC_UI_AXIS_Y] = src->size.c[OC_UI_AXIS_Y];
-    }
-    // if(mask & OC_UI_STYLE_LAYOUT_AXIS)
-    // {
-    //     layoutAxis = layoutAxis;
-    // }
-    // if(mask & OC_UI_STYLE_LAYOUT_ALIGN_X)
-    // {
-    //     dst->layout.align.x = src->layout.align.x;
-    // }
-    // if(mask & OC_UI_STYLE_LAYOUT_ALIGN_Y)
-    // {
-    //     dst->layout.align.y = src->layout.align.y;
-    // }
-    if(mask & OC_UI_STYLE_LAYOUT_SPACING)
-    {
+}
+
+void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src)
+{
+    oc_ui_apply_style_size(&dst->size.width, &src->size.width);
+    oc_ui_apply_style_size(&dst->size.height, &src->size.height);
+
+    if (src->spacing) {
         dst->spacing = src->spacing;
     }
-    if(mask & OC_UI_STYLE_LAYOUT_MARGIN_X)
-    {
+    if (src->margin.x) {
         dst->margin.x = src->margin.x;
     }
-    if(mask & OC_UI_STYLE_LAYOUT_MARGIN_Y)
-    {
+    if (src->margin.y) {
         dst->margin.y = src->margin.y;
     }
-    if(mask & OC_UI_STYLE_FLOAT_X)
-    {
-        dst->floating.c[OC_UI_AXIS_X] = src->floating.c[OC_UI_AXIS_X];
-        dst->floatTarget.x = src->floatTarget.x;
-    }
-    if(mask & OC_UI_STYLE_FLOAT_Y)
-    {
-        dst->floating.c[OC_UI_AXIS_Y] = src->floating.c[OC_UI_AXIS_Y];
-        dst->floatTarget.y = src->floatTarget.y;
-    }
-    if(mask & OC_UI_STYLE_COLOR)
-    {
+    if (src->color.r != 0 || src->color.g != 0 || src->color.b != 0 || src->color.a != 0) {
         dst->color = src->color;
     }
-    if(mask & OC_UI_STYLE_BG_COLOR)
-    {
+    if (src->bgColor.r != 0 || src->bgColor.g != 0 || src->bgColor.b != 0 || src->bgColor.a != 0) {
         dst->bgColor = src->bgColor;
     }
-    if(mask & OC_UI_STYLE_BORDER_COLOR)
-    {
+    if (src->borderColor.r != 0 || src->borderColor.g != 0 || src->borderColor.b != 0 || src->borderColor.a != 0) {
         dst->borderColor = src->borderColor;
     }
-    if(mask & OC_UI_STYLE_BORDER_SIZE)
-    {
+    if (src->borderSize) {
         dst->borderSize = src->borderSize;
     }
-    if(mask & OC_UI_STYLE_ROUNDNESS)
-    {
+    if (src->roundness) {
         dst->roundness = src->roundness;
     }
-    if(mask & OC_UI_STYLE_FONT)
-    {
+    if (src->font.h) {
         dst->font = src->font;
     }
-    if(mask & OC_UI_STYLE_FONT_SIZE)
-    {
+    if (src->fontSize) {
         dst->fontSize = src->fontSize;
     }
-    if(mask & OC_UI_STYLE_ANIMATION_TIME)
-    {
-        dst->animationTime = src->animationTime;
+    if (src->textAlign.x != OC_UI_ALIGN_NONE) {
+        dst->textAlign.x = src->textAlign.x;
     }
-    if(mask & OC_UI_STYLE_ANIMATION_MASK)
-    {
-        dst->animationMask = src->animationMask;
+    if (src->textAlign.y != OC_UI_ALIGN_NONE) {
+        dst->textAlign.y = src->textAlign.y;
     }
 }
 
@@ -904,13 +824,12 @@ void oc_ui_style_rule_match(oc_ui_context* ui, oc_ui_box* box, oc_ui_style_rule*
     {
         if(!selector)
         {
-            oc_ui_apply_style_with_mask(box->targetStyle, rule->style, rule->mask);
+            oc_ui_apply_style_with_mask(box->targetStyle, rule->style);
         }
         else
         {
             //NOTE create derived rule if there's more than one selector
             oc_ui_style_rule* derived = oc_arena_push_type(&ui->frameArena, oc_ui_style_rule);
-            derived->mask = rule->mask;
             derived->style = rule->style;
             derived->pattern.l = (oc_list){ &selector->listElt, rule->pattern.l.last };
 
@@ -925,9 +844,7 @@ void oc_ui_styling_prepass(oc_ui_context* ui, oc_ui_box* box, oc_list* before, o
     //NOTE: inherit style from parent
     if(box->parent)
     {
-        oc_ui_apply_style_with_mask(box->targetStyle,
-                                    box->parent->targetStyle,
-                                    OC_UI_STYLE_MASK_INHERITED);
+        oc_ui_apply_style_with_mask(box->targetStyle, box->parent->targetStyle);
     }
 
     //NOTE: append box before rules to before and tmp
@@ -1375,16 +1292,17 @@ void oc_ui_layout_compute_rect(oc_ui_context* ui, oc_ui_box* box, oc_vec2 pos)
         {
             if(child->style.floating.c[i])
             {
-                oc_ui_style* style = child->targetStyle;
-                if((child->targetStyle->animationMask & (OC_UI_STYLE_FLOAT_X << i))
-                   && !child->fresh)
-                {
-                    oc_ui_animate_f32(ui, &child->floatPos.c[i], child->style.floatTarget.c[i], style->animationTime);
-                }
-                else
-                {
+                // TODO (Skytrias): proper float position lerping
+                // oc_ui_style* style = child->targetStyle;
+                // if((child->targetStyle->animationMask & (OC_UI_STYLE_FLOAT_X << i))
+                //    && !child->fresh)
+                // {
+                //     oc_ui_animate_f32(ui, &child->floatPos.c[i], child->style.floatTarget.c[i], style->animationTime);
+                // }
+                // else
+                // {
                     child->floatPos.c[i] = child->style.floatTarget.c[i];
-                }
+                // }
                 childPos.c[i] = origin.c[i] + child->floatPos.c[i];
             }
         }
@@ -1548,7 +1466,7 @@ void oc_ui_draw_box(oc_ui_box* box)
 
         f32 x = 0;
         f32 y = 0;
-        switch(box->layoutAlign.x)
+        switch(style->textAlign.x)
         {
             case OC_UI_ALIGN_START:
                 x = box->rect.x + style->margin.x;
@@ -1563,7 +1481,7 @@ void oc_ui_draw_box(oc_ui_box* box)
                 break;
         }
 
-        switch(box->layoutAlign.y)
+        switch(style->textAlign.y)
         {
             case OC_UI_ALIGN_START:
                 y = box->rect.y + style->margin.y - textBox.y;
@@ -1626,7 +1544,7 @@ void oc_ui_draw()
 // frame begin/end
 //-----------------------------------------------------------------------------
 
-void oc_ui_begin_frame(oc_vec2 size, oc_ui_style* defaultStyle, oc_ui_style_mask defaultMask)
+void oc_ui_begin_frame(oc_vec2 size, oc_ui_style* defaultStyle)
 {
     oc_ui_context* ui = oc_ui_get_context();
 
@@ -1638,36 +1556,23 @@ void oc_ui_begin_frame(oc_vec2 size, oc_ui_style* defaultStyle, oc_ui_style_mask
     ui->clipStack = 0;
     ui->z = 0;
 
-    defaultMask &= OC_UI_STYLE_COLOR
-                 | OC_UI_STYLE_BG_COLOR
-                 | OC_UI_STYLE_BORDER_COLOR
-                 | OC_UI_STYLE_FONT
-                 | OC_UI_STYLE_FONT_SIZE;
-
-    oc_ui_style_match_before(oc_ui_pattern_all(), defaultStyle, defaultMask);
+    oc_ui_style_match_before(oc_ui_pattern_all(), defaultStyle);
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PIXELS, size.x },
-                                     .size.height = { OC_UI_SIZE_PIXELS, size.y } },
-                     OC_UI_STYLE_SIZE);
+                                     .size.height = { OC_UI_SIZE_PIXELS, size.y } });
 
     ui->root = oc_ui_box_begin("_root_", 0);
-
-    oc_ui_style_mask contentStyleMask = OC_UI_STYLE_SIZE
-                                      | OC_UI_STYLE_LAYOUT
-                                      | OC_UI_STYLE_FLOAT;
 
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
                                      .size.height = { OC_UI_SIZE_PARENT, 1 },
                                      .floating = { true, true },
-                                     .floatTarget = { 0, 0 } },
-                     contentStyleMask);
+                                     .floatTarget = { 0, 0 } });
 
     oc_ui_box* contents = oc_ui_box_make("_contents_", 0);
     contents->layoutAxis = OC_UI_AXIS_Y;
     contents->layoutAlign = (oc_ui_layout_align) { OC_UI_ALIGN_START, OC_UI_ALIGN_START };
 
     oc_ui_style_next(&(oc_ui_style){ .floating = { true, true },
-                                     .floatTarget = { 0, 0 } },
-                     OC_UI_STYLE_LAYOUT | OC_UI_STYLE_FLOAT_X | OC_UI_STYLE_FLOAT_Y);
+                                     .floatTarget = { 0, 0 } });
 
     ui->overlay = oc_ui_box_make("_overlay_", 0);
     ui->overlay->layoutAxis = OC_UI_AXIS_Y;
@@ -1744,8 +1649,7 @@ void oc_ui_cleanup(void)
 oc_ui_sig oc_ui_label_str8(oc_str8 label)
 {
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_TEXT, 0, 0 },
-                                     .size.height = { OC_UI_SIZE_TEXT, 0, 0 } },
-                     OC_UI_STYLE_SIZE_WIDTH | OC_UI_STYLE_SIZE_HEIGHT);
+                                     .size.height = { OC_UI_SIZE_TEXT, 0, 0 } });
 
     oc_ui_flags flags = OC_UI_FLAG_CLIP
                       | OC_UI_FLAG_DRAW_TEXT;
@@ -1799,24 +1703,15 @@ oc_ui_sig oc_ui_button_str8(oc_str8 label)
                                  .margin.y = 6,
                                  .color = theme->primary,
                                  .bgColor = theme->fill0,
-                                 .roundness = theme->roundnessSmall };
+                                 .roundness = theme->roundnessSmall,
+                                 .fontSize = 14 };
 
-    oc_ui_style_mask defaultMask = OC_UI_STYLE_SIZE_WIDTH
-                                 | OC_UI_STYLE_SIZE_HEIGHT
-                                 | OC_UI_STYLE_LAYOUT_MARGIN_X
-                                 | OC_UI_STYLE_LAYOUT_MARGIN_Y
-                                 | OC_UI_STYLE_LAYOUT_ALIGN_X
-                                 | OC_UI_STYLE_LAYOUT_ALIGN_Y
-                                 | OC_UI_STYLE_COLOR
-                                 | OC_UI_STYLE_BG_COLOR
-                                 | OC_UI_STYLE_ROUNDNESS;
-
-    oc_ui_style_next(&defaultStyle, defaultMask);
+    oc_ui_style_next(&defaultStyle);
 
     oc_ui_pattern hoverPattern = { 0 };
     oc_ui_pattern_push(&ui->frameArena, &hoverPattern, (oc_ui_selector){ .kind = OC_UI_SEL_STATUS, .status = OC_UI_HOVER });
     oc_ui_style hoverStyle = { .bgColor = theme->fill1 };
-    oc_ui_style_match_before(hoverPattern, &hoverStyle, OC_UI_STYLE_BG_COLOR);
+    oc_ui_style_match_before(hoverPattern, &hoverStyle);
     /*
     oc_ui_pattern activePattern = { 0 };
     oc_ui_pattern_push(&ui->frameArena, &activePattern, (oc_ui_selector){ .kind = OC_UI_SEL_STATUS, .status = OC_UI_ACTIVE });
@@ -1827,7 +1722,7 @@ oc_ui_sig oc_ui_button_str8(oc_str8 label)
     oc_ui_pattern_push(&ui->frameArena, &activeAndHoverPattern, (oc_ui_selector){ .kind = OC_UI_SEL_STATUS, .status = OC_UI_ACTIVE });
     oc_ui_pattern_push(&ui->frameArena, &activeAndHoverPattern, (oc_ui_selector){ .op = OC_UI_SEL_AND, .kind = OC_UI_SEL_STATUS, .status = OC_UI_HOVER });
     oc_ui_style activeAndHoverStyle = { .bgColor = theme->fill2 };
-    oc_ui_style_match_before(activeAndHoverPattern, &activeAndHoverStyle, OC_UI_STYLE_BG_COLOR);
+    oc_ui_style_match_before(activeAndHoverPattern, &activeAndHoverStyle);
 
     oc_ui_flags flags = OC_UI_FLAG_CLICKABLE
                       | OC_UI_FLAG_CLIP
@@ -2176,7 +2071,7 @@ oc_ui_box* oc_ui_scrollbar_str8(oc_str8 name, f32 thumbRatio, f32* scrollValue)
 {
     oc_ui_context* ui = oc_ui_get_context();
     oc_ui_theme* theme = ui->theme;
-    oc_ui_style_match_before(oc_ui_pattern_all(), &(oc_ui_style){ 0 }, OC_UI_STYLE_LAYOUT);
+    oc_ui_style_match_before(oc_ui_pattern_all(), &(oc_ui_style){ 0 });
     oc_ui_box* frame = oc_ui_box_begin_str8(name, 0);
     {
         f32 minThumbRatio = 17. / oc_max(frame->rect.w, frame->rect.h);
@@ -2202,23 +2097,18 @@ oc_ui_box* oc_ui_scrollbar_str8(oc_str8 name, f32 thumbRatio, f32* scrollValue)
         thumbStyle.size.c[trackAxis] = (oc_ui_size){ OC_UI_SIZE_PARENT, thumbRatio };
         thumbStyle.bgColor = theme->fill2;
 
-        oc_ui_style_mask trackStyleMask = OC_UI_STYLE_SIZE_WIDTH
-                                        | OC_UI_STYLE_SIZE_HEIGHT
-                                        | OC_UI_STYLE_LAYOUT
-                                        | OC_UI_STYLE_ROUNDNESS;
-
         oc_ui_flags trackFlags = OC_UI_FLAG_CLIP
                                | OC_UI_FLAG_DRAW_BACKGROUND
                                | OC_UI_FLAG_HOT_ANIMATION
                                | OC_UI_FLAG_ACTIVE_ANIMATION;
 
-        oc_ui_style_next(&trackStyle, trackStyleMask);
+        oc_ui_style_next(&trackStyle);
         oc_ui_box* track = oc_ui_box_begin("track", trackFlags);
         track->layoutAxis = trackAxis;
         track->layoutAlign = (oc_ui_layout_align) { OC_UI_ALIGN_START, OC_UI_ALIGN_START };
         oc_ui_tag_box(track, "track");
 
-        oc_ui_style_next(&beforeSpacerStyle, OC_UI_STYLE_SIZE);
+        oc_ui_style_next(&beforeSpacerStyle);
         oc_ui_box* beforeSpacer = oc_ui_box_make("before_spacer", 0);
 
         oc_ui_style thumbHoverActiveStyle = { .bgColor = theme->fill1 };
@@ -2227,30 +2117,24 @@ oc_ui_box* oc_ui_scrollbar_str8(oc_str8 name, f32 thumbRatio, f32* scrollValue)
                            &thumbHoverPattern,
                            (oc_ui_selector){ .kind = OC_UI_SEL_STATUS,
                                              .status = OC_UI_HOVER });
-        oc_ui_style_match_after(thumbHoverPattern, &thumbHoverActiveStyle, OC_UI_STYLE_BG_COLOR);
+        oc_ui_style_match_after(thumbHoverPattern, &thumbHoverActiveStyle);
         oc_ui_pattern thumbActivePattern = { 0 };
         oc_ui_pattern_push(&ui->frameArena,
                            &thumbActivePattern,
                            (oc_ui_selector){ .kind = OC_UI_SEL_STATUS,
                                              .status = OC_UI_ACTIVE });
-        oc_ui_style_match_after(thumbActivePattern, &thumbHoverActiveStyle, OC_UI_STYLE_BG_COLOR);
-
-        oc_ui_style_mask thumbStyleMask = OC_UI_STYLE_SIZE_WIDTH
-                                        | OC_UI_STYLE_SIZE_HEIGHT
-                                        | OC_UI_STYLE_LAYOUT
-                                        | OC_UI_STYLE_BG_COLOR
-                                        | OC_UI_STYLE_ROUNDNESS;
+        oc_ui_style_match_after(thumbActivePattern, &thumbHoverActiveStyle);
 
         oc_ui_flags thumbFlags = OC_UI_FLAG_CLICKABLE
                                | OC_UI_FLAG_DRAW_BACKGROUND
                                | OC_UI_FLAG_HOT_ANIMATION
                                | OC_UI_FLAG_ACTIVE_ANIMATION;
 
-        oc_ui_style_next(&thumbStyle, thumbStyleMask);
+        oc_ui_style_next(&thumbStyle);
         oc_ui_box* thumb = oc_ui_box_make("thumb", thumbFlags);
         oc_ui_tag_box(thumb, "thumb");
 
-        oc_ui_style_next(&afterSpacerStyle, OC_UI_STYLE_SIZE);
+        oc_ui_style_next(&afterSpacerStyle);
         oc_ui_box* afterSpacer = oc_ui_box_make("after_spacer", 0);
 
         oc_ui_box_end();
@@ -2323,14 +2207,11 @@ void oc_ui_panel_begin_str8(oc_str8 str, oc_ui_flags flags)
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1, 1 },
                                      .size.height = { OC_UI_SIZE_PARENT, 1, 1 },
                                      .margin.x = 0,
-                                     .margin.y = 0 },
-                     OC_UI_STYLE_SIZE
-                         | OC_UI_STYLE_LAYOUT_MARGINS);
+                                     .margin.y = 0 });
     oc_ui_box_begin_str8(str, flags);
 
     oc_ui_style_next(&(oc_ui_style){ .size.width = { OC_UI_SIZE_PARENT, 1 },
-                                     .size.height = { OC_UI_SIZE_PARENT, 1 } },
-                     OC_UI_STYLE_SIZE);
+                                     .size.height = { OC_UI_SIZE_PARENT, 1 } });
 
     oc_ui_box_begin("contents", 0);
 }
@@ -2368,9 +2249,7 @@ void oc_ui_panel_end(void)
                                          .size.height = { OC_UI_SIZE_PIXELS, 10, 0 },
                                          .floating.x = true,
                                          .floating.y = true,
-                                         .floatTarget = { 0, panel->rect.h - 10 } },
-                         OC_UI_STYLE_SIZE
-                             | OC_UI_STYLE_FLOAT);
+                                         .floatTarget = { 0, panel->rect.h - 10 } });
 
         scrollBarX = oc_ui_scrollbar("scrollerX", thumbRatioX, &scrollValueX);
 
@@ -2392,9 +2271,7 @@ void oc_ui_panel_end(void)
                                          .size.height = { OC_UI_SIZE_PARENT_MINUS_PIXELS, spacerSize, 0 },
                                          .floating.x = true,
                                          .floating.y = true,
-                                         .floatTarget = { panel->rect.w - 10, 0 } },
-                         OC_UI_STYLE_SIZE
-                             | OC_UI_STYLE_FLOAT);
+                                         .floatTarget = { panel->rect.w - 10, 0 } });
 
         scrollBarY = oc_ui_scrollbar("scrollerY", thumbRatioY, &scrollValueY);
 

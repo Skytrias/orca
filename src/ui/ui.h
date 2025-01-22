@@ -30,6 +30,7 @@ typedef enum
 
 typedef enum
 {
+    OC_UI_ALIGN_NONE,
     OC_UI_ALIGN_START,
     OC_UI_ALIGN_END,
     OC_UI_ALIGN_CENTER,
@@ -57,29 +58,10 @@ typedef union oc_ui_margin
     f32 c[OC_UI_AXIS_COUNT];
 } oc_ui_margin;
 
-// typedef struct oc_ui_layout
-// {
-//     oc_ui_axis axis;
-//     f32 spacing;
-
-//     union
-//     {
-//         struct
-//         {
-//             f32 x;
-//             f32 y;
-//         };
-
-//         f32 c[OC_UI_AXIS_COUNT];
-//     } margin;
-
-//     oc_ui_layout_align align;
-
-// } oc_ui_layout;
-
 typedef enum oc_ui_size_kind
 {
-    OC_UI_SIZE_TEXT = 0,
+    OC_UI_SIZE_NONE = 0,
+    OC_UI_SIZE_TEXT,
     OC_UI_SIZE_PIXELS,
     OC_UI_SIZE_CHILDREN,
     OC_UI_SIZE_PARENT,
@@ -117,61 +99,9 @@ typedef union oc_ui_box_floating
     bool c[OC_UI_AXIS_COUNT];
 } oc_ui_box_floating;
 
-//NOTE: flags for axis-dependent properties (e.g. OC_UI_STYLE_FLOAT_X/Y) need to be consecutive bits
-//      in order to play well with axis agnostic functions
-typedef u64 oc_ui_style_mask;
-
-enum
-{
-    OC_UI_STYLE_NONE = 0,
-    OC_UI_STYLE_SIZE_WIDTH = 1 << 1,
-    OC_UI_STYLE_SIZE_HEIGHT = 1 << 2,
-    OC_UI_STYLE_LAYOUT_AXIS = 1 << 3,
-    OC_UI_STYLE_LAYOUT_ALIGN_X = 1 << 4,
-    OC_UI_STYLE_LAYOUT_ALIGN_Y = 1 << 5,
-    OC_UI_STYLE_LAYOUT_SPACING = 1 << 6,
-    OC_UI_STYLE_LAYOUT_MARGIN_X = 1 << 7,
-    OC_UI_STYLE_LAYOUT_MARGIN_Y = 1 << 8,
-    OC_UI_STYLE_FLOAT_X = 1 << 9,
-    OC_UI_STYLE_FLOAT_Y = 1 << 10,
-    OC_UI_STYLE_COLOR = 1 << 11,
-    OC_UI_STYLE_BG_COLOR = 1 << 12,
-    OC_UI_STYLE_BORDER_COLOR = 1 << 13,
-    OC_UI_STYLE_BORDER_SIZE = 1 << 14,
-    OC_UI_STYLE_ROUNDNESS = 1 << 15,
-    OC_UI_STYLE_FONT = 1 << 16,
-    OC_UI_STYLE_FONT_SIZE = 1 << 17,
-    OC_UI_STYLE_ANIMATION_TIME = 1 << 18,
-    OC_UI_STYLE_ANIMATION_MASK = 1 << 19,
-
-    //masks
-    OC_UI_STYLE_SIZE = OC_UI_STYLE_SIZE_WIDTH
-                     | OC_UI_STYLE_SIZE_HEIGHT,
-
-    OC_UI_STYLE_LAYOUT_MARGINS = OC_UI_STYLE_LAYOUT_MARGIN_X
-                               | OC_UI_STYLE_LAYOUT_MARGIN_Y,
-
-    OC_UI_STYLE_LAYOUT = OC_UI_STYLE_LAYOUT_AXIS
-                       | OC_UI_STYLE_LAYOUT_ALIGN_X
-                       | OC_UI_STYLE_LAYOUT_ALIGN_Y
-                       | OC_UI_STYLE_LAYOUT_SPACING
-                       | OC_UI_STYLE_LAYOUT_MARGIN_X
-                       | OC_UI_STYLE_LAYOUT_MARGIN_Y,
-
-    OC_UI_STYLE_FLOAT = OC_UI_STYLE_FLOAT_X
-                      | OC_UI_STYLE_FLOAT_Y,
-
-    OC_UI_STYLE_MASK_INHERITED = OC_UI_STYLE_COLOR
-                               | OC_UI_STYLE_FONT
-                               | OC_UI_STYLE_FONT_SIZE
-                               | OC_UI_STYLE_ANIMATION_TIME
-                               | OC_UI_STYLE_ANIMATION_MASK,
-};
-
 typedef struct oc_ui_style
 {
     oc_ui_box_size size;
-    // oc_ui_layout layout;
     oc_ui_box_floating floating;
     oc_vec2 floatTarget;
     oc_color color;
@@ -187,7 +117,6 @@ typedef struct oc_ui_style
     oc_ui_layout_align textAlign;
 
     f32 animationTime;
-    oc_ui_style_mask animationMask;
 } oc_ui_style;
 
 typedef struct oc_ui_palette
@@ -456,7 +385,6 @@ typedef struct oc_ui_style_rule
 
     oc_ui_box* owner;
     oc_ui_pattern pattern;
-    oc_ui_style_mask mask;
     oc_ui_style* style;
 } oc_ui_style_rule;
 
@@ -660,12 +588,12 @@ ORCA_API oc_ui_context* oc_ui_get_context(void);
 ORCA_API void oc_ui_set_context(oc_ui_context* context);
 
 ORCA_API void oc_ui_process_event(oc_event* event);
-ORCA_API void oc_ui_begin_frame(oc_vec2 size, oc_ui_style* defaultStyle, oc_ui_style_mask mask);
+ORCA_API void oc_ui_begin_frame(oc_vec2 size, oc_ui_style* defaultStyle);
 ORCA_API void oc_ui_end_frame(void);
 ORCA_API void oc_ui_draw(void);
 ORCA_API void oc_ui_set_theme(oc_ui_theme* theme);
 
-#define oc_ui_frame(size, style, mask) oc_defer_loop(oc_ui_begin_frame((size), (style), (mask)), oc_ui_end_frame())
+#define oc_ui_frame(size, style) oc_defer_loop(oc_ui_begin_frame((size), (style)), oc_ui_end_frame())
 
 //-------------------------------------------------------------------------------------
 // Box keys
@@ -733,15 +661,15 @@ ORCA_API void oc_ui_tag_next_str8(oc_str8 string);
 //NOTE: styling API
 //WARN: You can use a pattern in multiple rules, but be aware that a pattern is references an underlying list of selectors,
 //      hence pushing to a pattern also modifies rules in which the pattern was previously used!
-ORCA_API void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src, oc_ui_style_mask mask);
+ORCA_API void oc_ui_apply_style_with_mask(oc_ui_style* dst, oc_ui_style* src);
 
 ORCA_API void oc_ui_pattern_push(oc_arena* arena, oc_ui_pattern* pattern, oc_ui_selector selector);
 ORCA_API oc_ui_pattern oc_ui_pattern_all(void);
 ORCA_API oc_ui_pattern oc_ui_pattern_owner(void);
 
-ORCA_API void oc_ui_style_next(oc_ui_style* style, oc_ui_style_mask mask);
-ORCA_API void oc_ui_style_match_before(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask);
-ORCA_API void oc_ui_style_match_after(oc_ui_pattern pattern, oc_ui_style* style, oc_ui_style_mask mask);
+ORCA_API void oc_ui_style_next(oc_ui_style* style);
+ORCA_API void oc_ui_style_match_before(oc_ui_pattern pattern, oc_ui_style* style);
+ORCA_API void oc_ui_style_match_after(oc_ui_pattern pattern, oc_ui_style* style);
 
 //-------------------------------------------------------------------------
 // Basic widget helpers
